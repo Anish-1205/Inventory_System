@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
 
 const navItems = [
-  { href: '/dashboard/products', label: 'Products' },
-  { href: '/dashboard/categories', label: 'Categories' },
-  { href: '/dashboard/inventory', label: 'Inventory' },
+  { href: '/products', label: 'Products' },
+  { href: '/categories', label: 'Categories' },
+  { href: '/inventory', label: 'Inventory' },
 ];
 
 export function DashboardNav() {

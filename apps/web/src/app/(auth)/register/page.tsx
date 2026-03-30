@@ -48,7 +48,7 @@ export default function RegisterPage() {
     try {
       const { data } = await apiClient.post('/auth/register', parsed.data);
       setAccessToken(data.data.accessToken);
-      router.push('/dashboard/products');
+      router.push('/products');
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } }).response?.data?.error ??

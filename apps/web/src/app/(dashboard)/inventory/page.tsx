@@ -31,7 +31,7 @@ export default function InventoryPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Product ID
+                Product
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 On Hand
@@ -51,7 +51,8 @@ export default function InventoryPage() {
             {(items ?? []).map((item: InventoryItem) => (
               <tr key={item.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 text-sm font-mono text-gray-600">
-                  {item.productId.slice(0, 8)}...
+                  {item.productName ? item.productName : `${item.productId.slice(0, 8)}...`}
+                  {item.productSku ? <span className="text-xs text-gray-400 ml-2">({item.productSku})</span> : null}
                 </td>
                 <td className="px-6 py-4 text-sm">
                   <span

@@ -20,7 +20,8 @@ export function middleware(request: NextRequest) {
 
   const accessToken = request.cookies.get('accessToken');
 
-  if (!accessToken && pathname.startsWith('/dashboard')) {
+  const protectedPrefixes = ['/dashboard', '/products', '/categories', '/inventory'];
+  if (!accessToken && protectedPrefixes.some((p) => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

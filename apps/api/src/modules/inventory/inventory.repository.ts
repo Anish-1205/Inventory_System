@@ -1,14 +1,33 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../../config/database.js';
-import { inventory, syncLog } from '../../db/schema/index.js';
+import { inventory, products, syncLog } from '../../db/schema/index.js';
 import type { AdjustInventoryInput, UpdateInventoryInput } from '@inventory-saas/shared';
 import { SYNC_ENTITY_TYPES, SYNC_OPERATIONS } from '@inventory-saas/shared';
 import { NotFoundError, ValidationError } from '../../lib/errors.js';
 
 export async function findAll(tenantId: string) {
-  return db.query.inventory.findMany({
+  const items = await db.query.inventory.findMany({
     where: eq(inventory.tenantId, tenantId),
-    with: { product: true } as Record<string, unknown>,
+  });
+
+  // Drizzle relation is not defined for `inventory -> products`, so we do a manual lookup.
+  const productIds = Array.from(new Set(items.map((i) => i.productId)));
+  const productsForTenant =
+    productIds.length > 0
+      ? await db.query.products.findMany({
+          where: inArray(products.id, productIds),
+        })
+      : [];
+
+  const productById = new Map(productsForTenant.map((p) => [p.id, p]));
+
+  return items.map((item) => {
+    const p = productById.get(item.productId);
+    return {
+      ...item,
+      productName: p?.name ?? null,
+      productSku: p?.sku ?? null,
+    };
   });
 }
 

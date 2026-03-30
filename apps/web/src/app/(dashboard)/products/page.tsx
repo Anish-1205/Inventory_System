@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useProducts, useDeleteProduct } from '@/lib/api/hooks';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { localDb } from '@/lib/db/schema';
@@ -8,7 +8,15 @@ import { networkMonitor } from '@/lib/sync/network-monitor';
 import type { Product } from '@inventory-saas/shared';
 
 export default function ProductsPage() {
-  const isOnline = networkMonitor.isOnline;
+  // Avoid hydration mismatch: `navigator.onLine` can differ between SSR and the browser.
+  const [mounted, setMounted] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    setIsOnline(networkMonitor.isOnline);
+    setMounted(true);
+    return networkMonitor.subscribe(setIsOnline);
+  }, []);
 
   // Online: server data via TanStack Query
   const { data: serverProducts, isLoading } = useProducts();
@@ -29,6 +37,10 @@ export default function ProductsPage() {
       p.sku.toLowerCase().includes(search.toLowerCase()),
   );
 
+  if (!mounted) {
+    return <div className="text-center py-12 text-gray-500">Loading products...</div>;
+  }
+
   if (isLoading && isOnline) {
     return <div className="text-center py-12 text-gray-500">Loading products...</div>;
   }
@@ -38,7 +50,7 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Products</h1>
         <a
-          href="/dashboard/products/new"
+          href="/products/new"
           className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium"
         >
           Add product
