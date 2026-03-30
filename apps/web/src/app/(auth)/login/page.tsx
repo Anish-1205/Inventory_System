@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import { setAccessToken } from '@/lib/auth/token-manager';
 import { LoginSchema } from '@inventory-saas/shared';
@@ -27,7 +28,7 @@ export default function LoginPage() {
     try {
       const { data } = await apiClient.post('/auth/login', parsed.data);
       setAccessToken(data.data.accessToken);
-      router.push('/dashboard/products');
+      router.push('/products');
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } }).response?.data?.error ??
@@ -76,6 +77,12 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="text-primary-600 hover:underline font-medium">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );

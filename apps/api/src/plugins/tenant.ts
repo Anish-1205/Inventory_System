@@ -12,7 +12,9 @@ async function tenantPlugin(app: FastifyInstance) {
     if (!tenantId) return;
 
     // SET LOCAL scopes to the current transaction — safe with connection pools
-    await db.execute(sql`SET LOCAL app.current_tenant_id = ${tenantId}`);
+    await db.execute(
+      sql.raw(`SET LOCAL app.current_tenant_id = '${tenantId}'`)
+    );
   });
 }
 

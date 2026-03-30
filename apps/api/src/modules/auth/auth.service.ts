@@ -24,7 +24,7 @@ async function signAccessToken(payload: {
   return new SignJWT({ ...payload, jti: randomUUID() })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(env.JWT_ACCESS_TTL)
+    .setExpirationTime(`${env.JWT_ACCESS_TTL}s`)
     .sign(jwtSecret);
 }
 
