@@ -28,13 +28,19 @@ export default function NewProductPage() {
     e.preventDefault();
     setError('');
 
+    const normalizeRequired = (v: string) => v.trim();
+    const normalizeOptional = (v: string) => {
+      const t = v.trim();
+      return t ? t : undefined;
+    };
+
     const payload = {
-      name: form.name,
-      sku: form.sku,
-      unitPrice: form.unitPrice,
-      costPrice: form.costPrice || undefined,
-      barcode: form.barcode || undefined,
-      categoryId: form.categoryId || undefined,
+      name: normalizeRequired(form.name),
+      sku: normalizeRequired(form.sku),
+      unitPrice: normalizeRequired(form.unitPrice),
+      costPrice: normalizeOptional(form.costPrice),
+      barcode: normalizeOptional(form.barcode),
+      categoryId: normalizeOptional(form.categoryId),
     };
 
     const parsed = CreateProductSchema.safeParse(payload);
@@ -45,11 +51,25 @@ export default function NewProductPage() {
 
     try {
       await createProduct.mutateAsync(parsed.data);
-      router.push('/dashboard/products');
+      router.push('/products');
     } catch (err: unknown) {
+      const responseData = (err as { response?: { data?: unknown } })?.response?.data as
+        | { error?: string; details?: unknown }
+        | undefined;
+
+      const apiErrorMessage = responseData?.error;
+
+      // Fastify zod error handler returns: { error: 'Validation failed', details: fieldErrors }
+      const details = responseData?.details as Record<string, unknown> | undefined;
+      const detailsFirstMessage =
+        details && typeof details === 'object'
+          ? Object.values(details)
+              .flatMap((v) => (Array.isArray(v) ? v : []))
+              .find((v) => typeof v === 'string' && v.length > 0)
+          : undefined;
+
       setError(
-        (err as { response?: { data?: { error?: string } } }).response?.data?.error ??
-          'Failed to create product',
+        apiErrorMessage ?? detailsFirstMessage ?? (err as { message?: string }).message ?? 'Failed to create product',
       );
     }
   }
