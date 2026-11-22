@@ -1,7 +1,6 @@
 # Inventory SaaS
 
-[![CI](https://github.com/Anish-1205/inventory-saas/actions/workflows/ci.yml/badge.svg)](https://github.com/Anish-1205/inventory-saas/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/Anish-1205/Inventory_System/actions/workflows/ci.yml/badge.svg)](https://github.com/Anish-1205/Inventory_System/actions/workflows/ci.yml)
 
 An **offline-first, multi-tenant SaaS Inventory Management System** built with Fastify, Next.js 14, and Drizzle ORM.
 
@@ -41,7 +40,7 @@ inventory-saas/              ← Turborepo monorepo root
 ## Features
 
 - **Offline-first** — all reads/writes go to local IndexedDB; background sync pushes/pulls changes when online
-- **Multi-tenancy** — each tenant is fully isolated via Row-Level Security (RLS) enforced in the API
+- **Multi-tenancy** — tenant data is isolated with PostgreSQL Row-Level Security (RLS) policies
 - **RBAC** — role-based access control (admin / manager / staff) enforced at route level
 - **Sync engine** — vector-clock-based conflict detection and resolution
 - **Conflict resolution** — last-write-wins with conflict log for manual review
@@ -64,8 +63,8 @@ inventory-saas/              ← Turborepo monorepo root
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Anish-1205/inventory-saas.git
-cd inventory-saas
+git clone https://github.com/Anish-1205/Inventory_System.git
+cd Inventory_System
 ```
 
 ### 2. Install dependencies
@@ -79,21 +78,25 @@ pnpm install
 **API (`apps/api`):**
 
 ```bash
-cp apps/api/.env.example apps/api/.env
-# Edit apps/api/.env — set DATABASE_URL, JWT_SECRET, COOKIE_SECRET, etc.
+cat > apps/api/.env <<'EOF'
+DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/inventory
+JWT_SECRET=replace-with-at-least-32-random-characters
+COOKIE_SECRET=replace-with-at-least-32-random-characters
+FRONTEND_URL=http://localhost:3000
+PORT=3001
+EOF
 ```
 
 **Web (`apps/web`):**
 
 ```bash
-cp apps/web/.env.local.example apps/web/.env.local
-# NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+echo "NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1" > apps/web/.env.local
 ```
 
 ### 4. Run database migrations
 
 ```bash
-pnpm db:migrate
+pnpm --filter @inventory-saas/api db:migrate
 ```
 
 ### 5. Start development servers
@@ -113,9 +116,9 @@ This starts both the API (port **3001**) and the web app (port **3000**) in para
 | `pnpm dev` | Start all apps in watch/dev mode |
 | `pnpm build` | Build all packages and apps |
 | `pnpm test` | Run unit tests across all workspaces |
-| `pnpm lint` | Run ESLint across all workspaces |
-| `pnpm db:migrate` | Apply pending Drizzle migrations (API only) |
-| `pnpm db:generate` | Generate Drizzle migration files from schema changes |
+| `pnpm lint` | Run the web app's Next.js lint task |
+| `pnpm --filter @inventory-saas/api db:migrate` | Apply pending Drizzle migrations |
+| `pnpm --filter @inventory-saas/api db:generate` | Generate Drizzle migration files from schema changes |
 
 ### Per-app scripts
 
@@ -156,6 +159,8 @@ All endpoints are prefixed with `/api/v1`.
 | POST | `/sync/push` | ✓ | Push local outbox to server |
 | GET | `/sync/pull` | ✓ | Pull server changes since `seq` |
 | GET | `/sync/state` | ✓ | Get current server sequence |
+
+`GET /health` is available outside the `/api/v1` prefix.
 
 ---
 
@@ -203,8 +208,3 @@ inventory-saas/
 4. Push to your branch and open a pull request
 5. Ensure CI passes (lint + type-check + tests)
 
----
-
-## License
-
-[MIT](LICENSE)
