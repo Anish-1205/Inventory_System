@@ -1,6 +1,7 @@
 # Inventory SaaS
 
 [![CI](https://github.com/Anish-1205/Inventory_System/actions/workflows/ci.yml/badge.svg)](https://github.com/Anish-1205/Inventory_System/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An **offline-first, multi-tenant SaaS Inventory Management System** built with Fastify, Next.js 14, and Drizzle ORM.
 
@@ -208,3 +209,8 @@ inventory-saas/
 4. Push to your branch and open a pull request
 5. Ensure CI passes (lint + type-check + tests)
 
+---
+
+## License
+
+[MIT](LICENSE)
